@@ -1,0 +1,8 @@
+asymptotic notation: how algorithms perform over time, measuring their total efficiency
+
+selection sort
+bubble sort
+merge sort
+
+iteration
+recursion
