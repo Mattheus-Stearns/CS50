@@ -1,0 +1,8 @@
+& = reference operator
+* = dereference operator
+%p = pointer 
+%i = int
+%c = char
+%f = float
+
+(with library) %s = string
