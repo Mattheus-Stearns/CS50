@@ -6,3 +6,6 @@ compare: compare.c
 
 copy: copy.c
 	clang -o copy copy.c -L"/Users/mattheuspieterstearns/Desktop/Desktop Folder/Coding/CS50/Intro to Computer Science" -lcs50
+
+phonebook: phonebook.c
+	clang -o phonebook phonebook.c -L"/Users/mattheuspieterstearns/Desktop/Desktop Folder/Coding/CS50/Intro to Computer Science" -lcs50
