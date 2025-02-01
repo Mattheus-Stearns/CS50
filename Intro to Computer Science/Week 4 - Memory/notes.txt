@@ -1,0 +1,38 @@
+& = reference operator
+* = dereference operator
+%p = pointer 
+%i = int
+%c = char
+%f = float
+
+(with library) %s = string
+
+memory control with malloc and free
+garbage values
+
+A representation of computer memory: (from top to bottom)
+
+––––––––––––––––––––––––––
+|      Machine Code      |
+––––––––––––––––––––––––––
+|         Globals        |
+––––––––––––––––––––––––––
+|          Heap          |
+|           |            |
+|           V            |
+|                        |
+|                        |
+|                        |
+|           ^            |
+|           |            |
+|         Stack          |
+––––––––––––––––––––––––––
+
+As you can see from this model, both the heap and the stack point to each other. This can create problems of:
+
+- Stack overflow
+- Heap overflow
+
+... Examples of buffer overflow.
+
+=> this was what happened with croudstrike

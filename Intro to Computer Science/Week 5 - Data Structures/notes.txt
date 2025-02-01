@@ -1,0 +1,157 @@
+data structures
+abstract data types
+
+queues
+FIFO: First in First out
+
+enqueue
+dequeue
+
+in code:-
+
+const int CAPACITY = 50;
+
+typedef struct
+{
+    person people[CAPACITY];
+    int size;
+} queue;
+
+stacks
+LIFO: Last in First Out
+
+push
+pop
+
+in code:-
+
+const int CAPACITY = 50;
+
+typedef struct
+{
+    person people[CAPACITY];
+    int size;
+} stack;
+
+data structures:
+struct
+.
+*
+->
+
+linked lists
+- value
+- pointer
+
+in code:-
+
+typedef struct node
+{
+    int number;
+    struct node *next;
+} node;
+
+with linked lists:
+- there are stacked lists
+- there are FIFO lists
+- you can also have lists that in the process of becoming a linked list get sorted, or, are already sorted before and then can add new variables in the middle of \n
+the linked list that conform to how you have sorted the list -- this is shown in list8.c
+
+there exists a data struct: Trees
+more specifically, binary search trees
+its a linked list that has two dimensions, or two pointers attached to each variable, allowing for binary search
+
+in code:-
+
+typedef struct node
+{
+    int number;
+    struct node *left;
+    struct node *right;
+} node;
+
+Here is how you would search such a tree, in code:-
+
+bool search(node *tree; int number)
+{
+    if (tree == NULL)
+    {
+        return false;
+    }
+    else if (number < tree->number)
+    {
+        return search(tree->left, number);
+    }
+    else if (number > tree->number)
+    {
+        return search(tree->right, number);
+    }
+    else
+    {
+        return true;
+    }
+}
+
+The problem is that trees could in the worst case scenario turn into linked lists if they are not balanced
+the best case scenario, is obviously O(logn) because the height of a balanced tree is O(logn)
+but if it doesnt then it devolves into O(n)
+
+dictionaries
+keys<->values
+
+Holy grail: O(1), or constant time
+this can be done through.... hashing!
+
+hash functions: a method to quantize things by group, reducing a large domain into a small amount of things and much easier to manipulate
+hash tables: built with hash functions
+
+hash tables can be an array of linked lists
+
+Progression from phonebook struct to this hash table in code:-
+
+typedef struct
+{
+    char *name;
+    char *person;
+} person;
+
+to
+
+typedef struct node
+{
+    char *name;
+    char *number;
+    struct node *next; // essentially including a linked list into the phonebook struct
+} node;
+
+instead of looking at the first character, you could always just look at the first three characters (as an example)
+but, looking at more than the first character, you will run into many cases that wont ever be used, and its just going to take up lots of space fast
+so we use only the first character
+
+For example, in code:-
+
+#include <ctype.h>
+
+unsigned int hash(char *word)
+{
+    return toupper(word[0]) - 'A'
+}
+
+The advantage of hash tables is that they are O(n/k), where k is your number of buckets
+
+indeed, you can come up with or find a hash function that will be best suited for your situation, and that will keep you as close to O(1) as possible
+shows the importance of a good, relevant hash function
+
+There also exists: tries
+a trie, is a data structure that is a tree of arrays
+this allows it to be, by definition, O(1) and operating in constant time
+
+in code:-
+
+typedef struct node
+{
+    struct node *children[26];
+    char *number;
+} node;
+
+The big tradeoff in the room: massively using memory to gain increase in time efficiency
