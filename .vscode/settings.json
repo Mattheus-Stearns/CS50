@@ -1,0 +1,5 @@
+{
+    "python.analysis.extraPaths": [
+        "{   \"python.analysis.extraPaths\": [     \"/opt/homebrew/lib/python3.11/site-packages\"   ] }"
+    ]
+}
