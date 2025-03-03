@@ -11,3 +11,25 @@ while True:
     if height >= 1 and height <= 8:
         break
 
+row = 0
+while row < height:
+    space = 0
+    while space < height - row - 1:
+        print(" ", end="")
+        space += 1
+    
+    col = 0
+    while col <= row:
+        print("#", end="")
+        col += 1
+    
+    print("  ", end="")
+
+    col = 0
+    while col <= row:
+        print("#", end="")
+        col += 1
+    
+    print()
+    row += 1
+
