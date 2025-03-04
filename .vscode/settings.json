@@ -1,5 +1,6 @@
 {
     "python.analysis.extraPaths": [
-        "{   \"python.analysis.extraPaths\": [     \"/opt/homebrew/lib/python3.11/site-packages\"   ] }"
+        "{   \"python.analysis.extraPaths\": [     \"/opt/homebrew/lib/python3.11/site-packages\"   ] }",
+        "./Intro to Computer Science/python-cs50-9.4.0/src"
     ]
 }

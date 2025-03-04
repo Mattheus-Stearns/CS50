@@ -1,0 +1,109 @@
+Flat-File Database
+-> (CSV): i.e., a simple database that holds data with columns and rows 
+
+CREATE TABLE IF NOT EXISTS table_name (
+    column1 datatype PRIMARY KEY,
+    column2 datatype,
+    column3 datatype,
+    ...
+);
+
+CREATE INDEX index_name
+ON table_name (column1, column2, ...);
+
+INSERT INTO table_name (column1, column2, column3, ...)
+VALUES (value1, value2, value3, ...);
+
+SELECT column1, column2, ...
+FROM table_name
+WHERE condition
+GROUP BY column
+ORDER BY column
+LIMIT number;
+
+DELETE FROM table_name
+WHERE condition;
+
+UPDATE table_name
+SET column1 = value1, column2 = value2, ...
+WHERE condition;
+
+Relational Database
+Master-File: A file which has a lot of id's and establishes the relationship between them
+Definintion File: A file which has a lot of id's tied to their real life values, establishing the entities that they are 
+
+one-to-one relationship: i.e. one show has one rating
+one-to-many relationships: i.e. one show in multiple genres
+many-to-many relationships: i.e. one show with many actors, and one actor in many shows
+primary key: unique identifier
+
+CREATE TABLE shows (
+    id INTEGER,
+    title TEXT NOT NULL,
+    year NUMERIC,
+    episodes INTEGER,
+    PRIMARY KEY(id)
+);
+
+CREATE TABLE ratings (
+    show_id INTEGER NOT NULL,
+    rating REAL NOT NULL,
+    votes INTEGER NOT NULL,
+    FOREIGN KEY(show_id) REFERENCES shows(id)
+);
+
+See how they are related? "PRIMARY KEY(id)" and "FOREIGN KEY(show_id) REFERENCES shows(id)"?
+
+Data Types
+
+BLOB
+INTEGER
+NUMERIC
+REAL
+TEXT
+
+Keywords
+
+NOT NULL
+UNIQUE
+
+PRIMARY KEY
+FOREIGN KEY
+
+Indexing exists to speed up the time taken for specific queries
+
+Trade-off: B-trees
+
+Race Conditions: When there are many requests simultanueosly to the same database, to change the same value, there can be issues.
+How do you handle this issue?
+
+BEGIN TRANSACTION
+COMMIT
+ROLLBACK
+
+Example:
+
+db.execute("BEGIN TRANSACTION")
+rows = db.execute("SELECT likes FROM posts WHERE id = ?", id);
+likes = rows[0]["likes"]
+db.execute("UPDATE posts SET likes = ? WHERE id = ?", likes + 1, id);
+db.execute("COMMIT")
+
+SQL Injection Attacks / Prompt Injection Attacks: Injecting code into the database / into AI models that at best resulted from a mistake but could be malicious
+
+Example:
+
+Email Address = malan@harvard.edu'--
+
+Code =>
+
+rows = db.execute(f"SELECT * FROM users WHERE username = '{username}' AND password = '{password}'")
+
+if rows:
+    ...
+
+This would effectively comment the password part of the SQL, allowing users to get in with just an existing email address
+
+SOLUTION:
+
+rows = db.execute("SELECT * FROM users WHERE username = ? AND password = ?", username, password)

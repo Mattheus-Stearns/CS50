@@ -1,0 +1,101 @@
+timestamp,language,problem
+2022-04-25 00:11:55,Go,Data Structures
+2020-11-19 17:47:10,Swift,Concurrency
+2020-04-23 12:16:50,Swift,Concurrency
+2021-03-30 23:54:15,Kotlin,Recursion
+2020-06-02 11:36:51,Kotlin,Recursion
+2020-09-10 23:46:11,Java,Web Development
+2023-01-13 20:10:20,Ruby,Cryptography
+2021-06-13 12:09:16,Swift,Cybersecurity
+2021-05-29 04:04:47,Ruby,Machine Learning
+2024-01-21 15:56:30,Python,Recursion
+2020-06-15 01:59:33,C++,Recursion
+2021-04-15 08:49:37,Kotlin,Machine Learning
+2022-11-10 21:05:38,Swift,Data Structures
+2020-05-30 03:32:46,Go,Machine Learning
+2022-07-15 23:51:39,Rust,Networking
+2021-08-28 13:49:44,Go,Cybersecurity
+2023-02-05 12:01:51,Java,Machine Learning
+2021-09-04 02:25:02,Go,Web Development
+2023-09-11 07:28:55,Swift,Networking
+2021-04-03 10:51:48,C++,Networking
+2022-10-26 04:12:37,Go,Networking
+2023-07-20 17:58:31,C++,Concurrency
+2021-06-09 02:52:54,Java,Web Development
+2021-05-21 21:26:15,Java,Recursion
+2020-06-20 07:28:59,Kotlin,Sorting Algorithms
+2020-01-14 02:16:20,Go,Recursion
+2021-04-15 04:52:53,TypeScript,Machine Learning
+2023-05-03 18:23:05,Rust,Game Development
+2020-05-11 21:09:26,Java,Recursion
+2020-02-29 08:18:11,Swift,Game Development
+2023-07-09 14:44:34,Ruby,Networking
+2023-10-07 22:48:17,Java,Networking
+2022-06-17 19:27:23,TypeScript,Game Development
+2020-11-01 14:38:22,Swift,Cybersecurity
+2020-03-30 23:25:45,Rust,Sorting Algorithms
+2021-10-14 06:30:55,Java,Concurrency
+2023-07-23 16:34:55,Go,Game Development
+2020-08-20 17:30:02,Kotlin,Cryptography
+2022-01-28 18:55:05,Python,Game Development
+2023-10-03 12:52:20,TypeScript,Sorting Algorithms
+2021-02-08 05:36:59,TypeScript,Web Development
+2021-04-15 12:57:56,TypeScript,Cryptography
+2022-06-03 16:17:14,JavaScript,Cryptography
+2020-03-10 13:11:44,C++,Cybersecurity
+2020-11-01 14:31:46,Java,Web Development
+2021-01-14 08:35:02,C++,Networking
+2020-04-28 18:37:32,Kotlin,Web Development
+2021-01-28 17:15:10,C++,Concurrency
+2020-02-14 00:04:25,Ruby,Networking
+2020-03-14 19:18:15,Swift,Concurrency
+2021-06-13 03:35:10,JavaScript,Cryptography
+2020-09-21 12:48:59,C++,Machine Learning
+2020-02-06 02:24:02,Java,Game Development
+2022-03-26 05:46:55,JavaScript,Concurrency
+2022-04-22 10:42:12,Java,Concurrency
+2021-07-11 18:45:52,Kotlin,Recursion
+2021-06-01 02:54:26,Python,Cryptography
+2022-03-15 08:08:26,Ruby,Cybersecurity
+2023-10-30 08:05:05,Swift,Sorting Algorithms
+2020-12-01 14:05:18,Java,Concurrency
+2022-03-22 18:48:21,Swift,Data Structures
+2021-05-13 02:04:11,Go,Machine Learning
+2021-06-11 16:46:28,Swift,Game Development
+2023-10-17 12:58:20,TypeScript,Web Development
+2022-08-05 03:42:37,Swift,Sorting Algorithms
+2020-11-01 17:27:57,Python,Concurrency
+2020-03-28 13:08:32,Go,Cryptography
+2021-05-29 08:11:55,Java,Cybersecurity
+2021-08-30 06:33:10,C++,Web Development
+2022-03-25 07:18:38,Go,Cybersecurity
+2022-04-23 22:08:26,JavaScript,Sorting Algorithms
+2022-11-13 07:15:17,Ruby,Web Development
+2023-01-04 17:41:57,JavaScript,Sorting Algorithms
+2021-11-04 11:35:35,Rust,Concurrency
+2021-03-20 04:24:53,Python,Data Structures
+2023-01-29 08:02:50,Rust,Recursion
+2021-11-09 15:25:47,Go,Game Development
+2021-08-19 14:20:55,Go,Recursion
+2023-08-02 21:29:07,JavaScript,Cybersecurity
+2020-08-01 01:34:37,Java,Data Structures
+2022-12-03 19:37:51,Python,Cybersecurity
+2021-11-20 22:00:23,Go,Cryptography
+2022-07-01 21:00:34,Rust,Recursion
+2022-01-11 04:18:48,Swift,Machine Learning
+2020-10-31 14:19:16,TypeScript,Sorting Algorithms
+2022-02-15 01:57:01,C++,Cryptography
+2021-06-13 01:17:05,Kotlin,Cybersecurity
+2022-10-09 18:34:52,JavaScript,Concurrency
+2022-01-22 21:04:39,Python,Concurrency
+2023-01-07 05:59:57,Python,Sorting Algorithms
+2021-07-29 00:40:04,Kotlin,Machine Learning
+2021-01-13 07:24:45,C++,Cryptography
+2020-08-18 14:55:24,TypeScript,Cybersecurity
+2021-09-26 13:15:36,C++,Concurrency
+2021-01-13 11:25:18,Kotlin,Data Structures
+2021-10-25 08:53:59,TypeScript,Cryptography
+2022-04-14 08:26:32,Go,Recursion
+2020-05-12 10:30:17,Swift,Data Structures
+2023-06-17 12:32:43,Rust,Sorting Algorithms
+2023-01-29 11:24:00,Swift,Web Development
