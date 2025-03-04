@@ -1,0 +1,17 @@
+I think what I would do is for every user that has a certain song in their top 100, I would calculate the aura of that song and then append it to a relational database.
+Then, when another user has a song that was in a previous user's wrapped, all it has to do is reference the database and it doesn't have to calculate the value again. If the
+song is one that is appearing for the first time in the top 100, then that could spark spotify calculating the aura by running SQL code something like this:
+
+CREATE TABLE IF NOT EXISTS auras (
+    FOREIGN KEY(song_id) REFERENCES songs(id),
+    aura REAL
+)
+
+INSERT INTO auras (song_id, aura)
+VALUES (song_id, SELECT AVG(energy + valence + danceability) FROM songs)
+
+Although I am not completely sure if its correct, because I cannot debug this code, this is the general idea. The audio aura for an individual listener could then be a
+weighted aggregate of their song profile, where the number one song of a listener would have a higher weight than the number one hundred song.
+
+This might not be a perfect calculation of the aura of the listener, and it might be better to have the weighting of the songs be based off of the time listened to each song,
+to represent what the listener is actually listening to and the time that they spend listening to it.
