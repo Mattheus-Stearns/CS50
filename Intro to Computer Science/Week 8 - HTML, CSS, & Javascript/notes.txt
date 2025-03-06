@@ -1,0 +1,111 @@
+internet
+- routers: rout information from one place to another
+warehouses -> data centers
+TCP/IP refers to the software that distributes this data
+IP address = #.#.#.# {IPv4}
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+| Version| IHL |  Type of Service |        Total Length         |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|          Identification         |Flags|    Fragment Offset    |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|  Time to Live  |    Protocol    |       Header Checksum       |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                       Source Address                          |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                     Destination Address                       |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                 Options                   |       Padding     |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                Example Internet Datagram Header
+
+TCP: used in reconfiguring packets of data upon their arrival to their destination
+ports = a unique numeric identifier for a specific internet service
+  0                   1                   2                   3  
+  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1  
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
+|          Source Port          |       Destination Port        |  
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
+|                        Sequence Number                        |  
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
+|                    Acknowledgment Number                      |  
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
+|  Data  | Res |U|A|P|R|S|F|                                    |  
+| Offset | 0 0 |R|C|S|S|Y|I|          Window Size               |  
+|        |     |G|K|H|T|N|N|                                    |  
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
+|          Checksum             |        Urgent Pointer         |  
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
+|                    Options                    |    Padding    |  
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
+|                            Data                               |  
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
+
+                         TCP Header Format
+
+DNS Servers: Domain Name System Servers
+-> Essentially act as a dictionary, with key-value pairs, where the key is the Fully Qualified Domain Name and the value is the IP Address
+DHCP: Dynamic Host Configuration Protocol
+HTTP/HTTPS: Hyper Text Transformation Protocal/Hyper Text Transformation Protocal Secure
+URLs: Uniform Resource Locators
+
+Example = https://www.example.com/folder/file.html
+Domain Name = example.com
+Host Name = www.example.com
+Top Level Domain / TLD = com
+
+Envelope for https = (
+    GET
+    PUSH
+    ...
+
+)
+
+When looking up the harvard website:
+
+GET / HTTP/2
+HOST: www.harvard.edu
+...
+
+Hopefully you would get back:
+
+HTTP/2 200
+Content-type: text/html
+...
+
+Status Codes:
+200 = OK
+301 = Moved Permanently
+302 = Found
+304 = Not Modified
+307 = Temporary Redirect
+401 = Unauthorized
+403 = Forbidden
+404 = Not Found
+500 = Internal Server Error
+503 = Service Unavailable
+...
+
+HTML: Hyper-Text Markup Language
+
+you can also have a website with key-value pairs in the URL:
+
+https://www.example.com/path?key=value
+
+Regular Expression / Regex Examples:
+
+. = any single character
+* = zero or more times
++ = one or more times
+? = 0 or 1 time
+{n} = n occurences
+{n,m} = at least n occurences, at most n occurences
+...
+[0123456789] = any one of the enclosed characters
+[0-9] = any one of the range of characters
+\d = any digit
+\D = any character that is not a digit
+...
+
+Markup Validation: validator.w3.org
