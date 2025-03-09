@@ -109,3 +109,75 @@ Regular Expression / Regex Examples:
 ...
 
 Markup Validation: validator.w3.org
+
+CSS
+
+properties: key-value pairs
+e.g.
+
+type selector
+class selector
+ID selector
+attribute selector
+...
+
+3 ways of incorporating CSS:
+directly in the opening tag
+in the head tag, with the <style> tag
+by linking to a stylesheet
+
+JavaScript
+
+Conditionals
+
+if (x < y)
+{
+
+}
+else if (x > y)
+{
+
+}
+else
+{
+
+}
+
+Variables
+
+let counter = 0;
+counter++;
+
+Loops
+
+for (let i = 0; i < 3; i++)
+{
+
+}
+
+while(true)
+{
+
+}
+
+ways of incorporating JavaScript:
+using a <script> tag in the <head> tag
+using a <script> tag with a source element in the <head> tag, similar to css' stylesheet
+sometimes this is done at the bottom of the body tag, because of order of operations
+
+JavaScript events examples:
+
+blur
+change
+click
+drag
+focus
+keyup
+load
+mousedown
+mouseover
+mouseup
+submit
+touchmove
+unload
+...
