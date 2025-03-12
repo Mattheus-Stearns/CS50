@@ -1,4 +1,4 @@
-from PIL import Image, ImageFilter
+from PIL import Image, ImageFilter # type: ignore
 
 before = Image.open("bridge.bmp")
 after = before.filter(ImageFilter.BoxBlur(1))
