@@ -1,9 +1,12 @@
 body {
     font-family: 'Montserrat', sans-serif;
+    margin: 0; /* recommended for fixed header */
+    padding: 0;
 }
 
+/* The default #header can have minimal top margin for large screens. */
 #header {
-    margin-top: 40px;
+    margin-top: 50px; /* Enough to clear the regular nav on big screens */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -34,6 +37,7 @@ body {
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
 }
 
 img {
@@ -43,21 +47,26 @@ img {
     border-radius: 30px;
 }
 
-#topBar{
-	width:100%;
-	height: 50px;
-	position:fixed;
-	z-index:100;
-	overflow: hidden;
-  	top: 0;
-}
-
-#nav-container {
-    padding: 5px;
-    height: 60px;
+/* 1) Remove the fixed height. 
+   2) Keep it fixed position if you want it always on top. */
+#topBar {
+    width: 100%;
+    position: fixed;
+    z-index: 100;
+    top: 0;
+    /* overflow: hidden; <-- you can remove if you want the bar to expand fully */
     background: #AEC6CF;
 }
 
+/* 3) Remove or comment out the fixed height from #nav-container
+   so it grows with its children */
+#nav-container {
+    padding: 5px;
+    /* height: 60px;  <-- remove this line */
+    background: #AEC6CF; 
+}
+
+/* Keep or tweak #nav-title as you wish */
 #nav-title {
     text-align: center;
     float: left;
@@ -66,22 +75,38 @@ img {
     font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;
 }
 
+/* Default: items are inline, floating right */
 #nav-container ul {
     float: right;
 }
 
-@media only screen and (max-width: 880px) {
-    #nav-container ul {
-        float: none;
-    }
-}
-
+/* For wide screens, keep them inline */
 #nav-container ul li {
     display: inline;
     padding: 0 10px 0 10px;
     margin: 0 20px 0 20px;
 }
 
+/* When screen is under 880px, stack them. */
+@media only screen and (max-width: 880px) {
+    #nav-container ul {
+        float: none;
+        display: block;
+        text-align: center;
+    }
+    #nav-container ul li {
+        display: block;
+        margin: 10px 0;
+    }
+}
+@media only screen and (max-width: 1194px) {
+    #header {
+        margin-top: 100px; /* or 200px, etc., depending on how tall your nav becomes */
+    }
+}
+
+
+/* Nav button styles */
 .nav-btn {
     color: white;
     border: 0 none;
