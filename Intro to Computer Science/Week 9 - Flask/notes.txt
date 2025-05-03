@@ -1,0 +1,15 @@
+cannonical website domain:
+
+https://www.example.com/folder/file.html
+
+really just:
+
+https://www.example.com/path
+https://www.example.com/route?key=value&key=value
+
+which is really just a request to the server:
+
+GET /search?q=cats HTTP/2
+Host: www.google.com
+...
+
