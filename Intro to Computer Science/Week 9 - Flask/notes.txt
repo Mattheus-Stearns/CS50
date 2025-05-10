@@ -36,7 +36,7 @@ def index():
 `request.args`: stores key-value pairs
 `{{ placeholder }}`: fstring for html
 
-Jinja is the package that flask is using for the templates
+Jinja is the templating library that flask uses
 
 representative list of files and folders typically needed in a flask app:
 
@@ -48,4 +48,60 @@ templates/
 you can take two templates and factor out the commonalities between them
 
 get: takes a value and then puts it into the url, while also including it into the 'letter' communicated between the dns and the user
+get requests are stored in key value pairs, accessed through `request.args`
+
 post: takes a value, doesnt display it in the url, and is for more sensitive data, but still includes it in the letter between the dns and user
+while post requests are accessed through `request.form`
+
+example jinja conditional:
+
+hello,
+{% if name %}
+    {{ name }}
+{% else %}
+    world
+{% endif %}
+
+example jinja for loop:
+
+{% for sport in sports %}
+    <option value="{{ sport }}">{{ sport }}</option>
+{% endfor %}
+
+what we are really implementing can be seen as this:
+app.py represents the controller
+everything in the templates folder (and the static folder) represents the view
+writing and reading data from a database represents the model
+
+These are all referred to collecively as MVC (model, view, controller)
+Where they have this relationship:
+Model <-> Controller <-> View <-> User
+
+to prevent having the user constantly login time and time again into the same website, the server 'stamps' the user – stating that they have already been authenticated, and this is seen through...
+Cookies! (... and sessions)
+
+Remember, this is the discussion between computer and user:
+
+POST / HTTP/2
+HOST: accounts.google.com
+
+...
+
+HTTP/2 200
+Content-Type: text/html
+Set-Cookie: session=value
+...
+
+Then, after getting assigned the cookie, every time the user logs in...
+
+GET / HTTP/2
+HOST: accounts.google.com
+Cookie: session=value
+...
+
+!!! REMEMBER !!! For data security, Cookies should be long random strings. They should not simply be username and password if you are using the server in a production environment
+
+Flask itself has the feaure: session
+
+to get /search?q={some value} to actually work, you have to include an API, or application programming interface, into the app.py 
+but really, its bad form to have a list of html files be returned as a result of your API, so for that reason we use raw data, and thus JSON (JavaScript Object Notation) is used
