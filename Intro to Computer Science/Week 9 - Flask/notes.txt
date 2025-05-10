@@ -13,3 +13,39 @@ GET /search?q=cats HTTP/2
 Host: www.google.com
 ...
 
+We are going to be using a popular framework: Flask
+
+flask run
+
+app.py
+requirements.txt
+
+example:
+
+from flask import Flask, request
+
+app = Flask(__name__)
+
+
+@app.route("/")
+def index():
+    return "hello, world!"
+
+-----
+
+`request.args`: stores key-value pairs
+`{{ placeholder }}`: fstring for html
+
+Jinja is the package that flask is using for the templates
+
+representative list of files and folders typically needed in a flask app:
+
+app.py
+requirements.txt
+static/
+templates/
+
+you can take two templates and factor out the commonalities between them
+
+get: takes a value and then puts it into the url, while also including it into the 'letter' communicated between the dns and the user
+post: takes a value, doesnt display it in the url, and is for more sensitive data, but still includes it in the letter between the dns and user
