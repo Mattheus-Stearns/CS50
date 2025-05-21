@@ -4,6 +4,7 @@ from cs50 import SQL
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
+from datetime import datetime, timezone
 
 from helpers import apology, login_required, lookup, usd
 
@@ -42,7 +43,42 @@ def index():
 @login_required
 def buy():
     """Buy shares of stock"""
-    return apology("TODO")
+
+    if request.method == "POST":
+
+        symbol = request.form.get("symbol")
+        shares = int(request.form.get("shares"))
+
+        if not symbol:
+            return apology("must enter a symbol", 403)
+        
+        elif not shares:
+            return apology("must enter a number of shares", 403)
+        
+        elif shares <= 0:
+            return apology("must enter a positive number of shares", 403)
+        
+        elif lookup(symbol) is None:
+            return apology("invalid symbol", 403)
+        
+        usersAvailableCash = db.execute("SELECT cash FROM users WHERE id = ?", session["user_id"])[0]["cash"]
+        price = lookup(symbol)["price"]
+        netPrice = price * shares
+        timestamp = datetime.now(timezone.utc).isoformat()
+
+        if usersAvailableCash < netPrice:
+            return apology("balance exceeded with request", 403)
+
+        else:
+            db.execute("INSERT INTO transactions (user_id, symbol, shares, price, timestamp) VALUES (?, ?, ?, ?, ?)",
+                session["user_id"], symbol, shares, price, timestamp
+            )            
+            db.execute("UPDATE users SET cash = cash - ? WHERE id = ?", netPrice, session["user_id"])
+
+            return redirect("/")
+
+    else:
+        return render_template("buy.html")
 
 
 @app.route("/history")
