@@ -21,3 +21,36 @@ nav .navbar-brand .green
 {
     color: #2e944b;
 }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    table-layout: fixed;
+}
+
+th {
+    text-align: left;
+    font-weight: bold;
+    padding: 12px 8px;
+    border-bottom: 1px solid #444;
+}
+
+td {
+    padding: 12px 8px;
+    border-bottom: 1px solid #333;
+}
+
+td:nth-child(3),
+td:nth-child(4) {
+    text-align: right;
+}
+
+tr:last-of-type td {
+    border-bottom: none;
+}
+
+tr:hover {
+    background-color: #1e1e1e;
+}
