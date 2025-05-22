@@ -51,6 +51,10 @@ tr:last-of-type td {
     border-bottom: none;
 }
 
-tr:hover {
-    background-color: #1e1e1e;
+.buy-row {
+    background-color: rgba(40, 167, 69, 0.1);  /* Bootstrap success green */
+}
+
+.sell-row {
+    background-color: rgba(220, 53, 69, 0.1);  /* Bootstrap danger red */
 }

@@ -37,16 +37,25 @@ def after_request(response):
 def index():
     """Show portfolio of stocks"""
 
-    stocks = db.execute("SELECT symbol, SUM(shares) AS shares FROM transactions WHERE user_id = ? GROUP BY symbol", session["user_id"])
+    stocks = db.execute("""
+        SELECT symbol, price,
+           SUM(CASE WHEN type = 0 THEN shares ELSE 0 END) -
+           SUM(CASE WHEN type = 1 THEN shares ELSE 0 END) AS shares
+        FROM transactions
+        WHERE user_id = ?
+        GROUP BY symbol
+    """, session["user_id"])
     
     grand_total = 0
     for stock in stocks:
-        stock["price"] = lookup(stock["symbol"])["price"]
-        stock["total"] = stock["shares"] * stock["price"]
+        stock["currentPrice"] = lookup(stock["symbol"])["price"]
+        stock["total"] = stock["shares"] * stock["currentPrice"]
         grand_total += stock["total"]
 
     cash = db.execute("SELECT cash FROM users WHERE id = ?", session["user_id"])[0]["cash"]
     grand_total += cash
+
+    stocks = [stock for stock in stocks if stock["shares"] > 0]
 
     return render_template("index.html", stocks=stocks, cash=cash, grand_total=grand_total)
 
@@ -55,6 +64,8 @@ def index():
 @login_required
 def buy():
     """Buy shares of stock"""
+
+    buy = 0
 
     if request.method == "POST":
 
@@ -82,8 +93,8 @@ def buy():
             return apology("balance exceeded with request", 403)
 
         else:
-            db.execute("INSERT INTO transactions (user_id, symbol, shares, price, timestamp) VALUES (?, ?, ?, ?, ?)",
-                session["user_id"], symbol, shares, price, timestamp
+            db.execute("INSERT INTO transactions (user_id, symbol, shares, price, timestamp, type) VALUES (?, ?, ?, ?, ?, ?)",
+                session["user_id"], symbol, shares, price, timestamp, buy
             )            
             db.execute("UPDATE users SET cash = cash - ? WHERE id = ?", netPrice, session["user_id"])
 
@@ -97,7 +108,10 @@ def buy():
 @login_required
 def history():
     """Show history of transactions"""
-    return apology("TODO")
+
+    stocks = db.execute("SELECT symbol, shares, price, timestamp, type FROM transactions WHERE user_id = ?", session["user_id"])
+
+    return render_template("history.html", stocks=stocks)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -199,4 +213,66 @@ def register():
 @login_required
 def sell():
     """Sell shares of stock"""
-    return apology("TODO")
+
+    sell = 1
+
+    if request.method == "POST":
+
+        symbol = request.form.get("symbol")
+        
+        try:
+            shares = int(request.form.get("shares"))
+        except (ValueError, TypeError):
+            return apology("Invalid number of shares", 403)
+        
+        if not symbol:
+            return apology("no stock selected", 403)
+        
+        if int(shares) < 1:
+            return apology("you must enter a positive integer amount of shares", 403)
+
+        row = db.execute("""
+            SELECT
+                SUM(CASE WHEN type = 0 THEN shares ELSE 0 END) AS total_bought,
+                SUM(CASE WHEN type = 1 THEN shares ELSE 0 END) AS total_sold
+            FROM transactions
+            WHERE user_id = ? AND symbol = ?
+        """, session["user_id"], symbol)[0]
+
+        total_bought = row["total_bought"] or 0
+        total_sold = row["total_sold"] or 0
+
+        available_shares = total_bought - total_sold
+
+        if available_shares <= 0:
+            return apology("you do not have any shares of that stock", 403)
+        
+        if available_shares < shares:
+            return apology("you do not have enough shares of that stock", 403)
+        
+        price = lookup(symbol)["price"]
+        netPrice = price * shares
+        timestamp = datetime.now(timezone.utc).isoformat()
+
+        db.execute("INSERT INTO transactions (user_id, symbol, shares, price, timestamp, type) VALUES (?, ?, ?, ?, ?, ?)",
+                session["user_id"], symbol, shares, price, timestamp, sell
+            )
+
+        db.execute("UPDATE users SET cash = cash + ? WHERE id = ?", netPrice, session["user_id"])
+
+        return redirect("/")
+
+    else:
+
+        rows = db.execute("""
+            SELECT symbol,
+                SUM(CASE WHEN type = 0 THEN shares ELSE 0 END) AS total_bought,
+                SUM(CASE WHEN type = 1 THEN shares ELSE 0 END) AS total_sold
+            FROM transactions
+            WHERE user_id = ?
+            GROUP BY symbol
+            HAVING (total_bought - total_sold) > 0
+        """, session["user_id"])
+
+
+        return render_template("sell.html", symbols=rows)

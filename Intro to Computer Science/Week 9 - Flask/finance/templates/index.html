@@ -10,7 +10,8 @@
             <tr>
                 <th>Symbol</th>
                 <th>Shares</th>
-                <th>Price</th>
+                <th>Price Bought At</th>
+                <th>Current Price</th>
                 <th>TOTAL</th>
             </tr>
         </thead>
@@ -21,16 +22,19 @@
                 <td>{{ stock.symbol }}</td>
                 <td>{{ stock.shares }}</td>
                 <td>{{ stock.price | usd }}</td>
+                <td>{{ stock.currentPrice | usd }}</td>
                 <td>{{ totalPrice | usd }}</td>
             </tr>
             {% endfor %}
             <tr>
                 <td></td>
                 <td></td>
+                <td></td>
                 <td><strong>Cash</strong></td>
                 <td>{{ cash | usd }}</td>
             </tr>
             <tr>
+                <td></td>
                 <td></td>
                 <td></td>
                 <td><strong>TOTAL</strong></td>

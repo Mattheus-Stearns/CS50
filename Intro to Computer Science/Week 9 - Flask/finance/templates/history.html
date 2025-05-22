@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    History
+{% endblock %}
+
+{% block main %}
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Shares</th>
+                <th>Price</th>
+                <th>Net Price</th>
+                <th>Time</th>
+                <th>Type of Transaction</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stock in stocks %}
+            {% set netPrice = stock.shares * stock.price %}
+            <tr class="{% if stock.type == 0 %}buy-row{% else %}sell-row{% endif %}">
+                <td>{{ stock.symbol }}</td>
+                <td>{{ stock.shares }}</td>
+                <td>{{ stock.price | usd }}</td>
+                <td>{{ netPrice | usd }}</td>
+                <td><span class="utc-time">{{ stock.timestamp }}</span></td>
+                <td>{{ 'Buy' if stock.type == 0 else 'Sell' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.querySelectorAll('.utc-time').forEach(span => {
+    let timestamp = span.textContent.trim();
+
+    if (timestamp.endsWith('+00:00')) {
+        timestamp = timestamp.replace('+00:00', 'Z');
+    }
+
+    const date = new Date(timestamp);
+
+    if (!isNaN(date)) {
+        span.textContent = date.toLocaleString();
+    } else {
+        span.textContent = "Invalid date";
+    }
+});
+</script>
+{% endblock %}
