@@ -17,7 +17,7 @@
         </thead>
         <tbody>
             {% for stock in stocks %}
-            {% set totalPrice = stock.shares * stock.price %}
+            {% set totalPrice = stock.shares * stock.currentPrice %}
             <tr>
                 <td>{{ stock.symbol }}</td>
                 <td>{{ stock.shares }}</td>
