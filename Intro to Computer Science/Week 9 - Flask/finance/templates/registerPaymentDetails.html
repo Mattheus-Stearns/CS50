@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Register Payment Method
+{% endblock %}
+
+{% block main %}
+    <form action="/add" method="post">
+        <div class="mb-3">
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" name="cardNumber" placeholder="Credit/Debit Card Number" type="number" minlength="16" maxlength="16">
+        </div>
+        <div class="mb-3">
+            <input autocomplete="off" class="form-control mx-auto w-auto" name="expiryDate" placeholder="Expiry Date" type="month">
+        </div>
+         <div class="mb-3">
+            <input autocomplete="off" class="form-control mx-auto w-auto" name="securityCode" placeholder="Security Code" type="number" minlength="3" maxlength="3">
+        </div>
+        <button class="btn btn-primary" type="submit">Register Payment Method</button>
+    </form>
+{% endblock %}

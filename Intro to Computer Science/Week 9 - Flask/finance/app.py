@@ -46,11 +46,18 @@ def index():
         GROUP BY symbol
     """, session["user_id"])
     
-    grand_total = 0
-    for stock in stocks:
-        stock["currentPrice"] = lookup(stock["symbol"])["price"]
-        stock["total"] = stock["shares"] * stock["currentPrice"]
-        grand_total += stock["total"]
+    try: 
+        grand_total = 0
+        for stock in stocks:
+            stock["currentPrice"] = lookup(stock["symbol"])["price"]
+            stock["total"] = stock["shares"] * stock["currentPrice"]
+            grand_total += stock["total"]
+    except TypeError:
+        grand_total = 0
+        for stock in stocks:
+            stock["currentPrice"] = 0
+            stock["total"] = 0
+
 
     cash = db.execute("SELECT cash FROM users WHERE id = ?", session["user_id"])[0]["cash"]
     grand_total += cash
@@ -276,3 +283,56 @@ def sell():
 
 
         return render_template("sell.html", symbols=rows)
+    
+@app.route("/add", methods=["GET", "POST"])
+@login_required
+def add():
+    """Add additional cash to account"""
+
+    if request.method == "POST":
+
+
+        cardNumber = request.form.get("cardNumber")
+        expiryDate = request.form.get("expiryDate")
+        securityCode = request.form.get("securityCode")
+
+        if not cardNumber:
+            return apology("please enter a card number", 403)
+        
+        if len(cardNumber) != 16:
+            return apology("please enter a correct number of digits for the card number", 403)
+        
+        if not expiryDate:
+            return apology("please enter an expiry date", 403)
+        
+        if not securityCode:
+            return apology("please enter a security code", 403)
+        
+        if len(securityCode) != 3:
+            return apology("please enter a correct number of digits for the security code", 403)
+        
+        paymentDetails = generate_password_hash(str(cardNumber) + str(expiryDate) + str(securityCode))
+
+        if not paymentDetails:
+            return apology("error with generating payment details", 401)
+
+        db.execute("UPDATE users SET paymentMethod = ? WHERE id = ?", paymentDetails, session["user_id"])
+
+        render_template("addBalance.html")
+
+        amount = request.form.get("amount")
+
+        if not amount:
+            return apology("please enter an amount to add", 403)
+        
+        if int(amount) < 1:
+            return apology("please enter a positive integer", 403)
+        
+        db.execute("UPDATE users SET cash = cash + ? WHERE id = ?", amount, session["user_id"])
+
+        return redirect("/")
+
+    elif db.execute("SELECT paymentMethod FROM users WHERE id = ?", session["user_id"]) == None:
+        return render_template("registerPaymentDetails.html")
+    else:
+        return render_template("addBalance.html")
