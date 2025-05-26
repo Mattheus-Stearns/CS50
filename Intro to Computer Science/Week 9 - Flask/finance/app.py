@@ -45,16 +45,14 @@ def index():
         WHERE user_id = ?
         GROUP BY symbol
     """, session["user_id"])
-    
+
     stocks = [stock for stock in stocks if stock["shares"] and stock["shares"] > 0]
-    
+
     grand_total = 0
     for stock in stocks:
         stock["currentPrice"] = lookup(stock["symbol"])["price"]
         stock["total"] = stock["shares"] * stock["currentPrice"]
         grand_total += stock["total"]
-
-
 
     cash = db.execute("SELECT cash FROM users WHERE id = ?", session["user_id"])[0]["cash"]
     grand_total += cash
@@ -74,33 +72,38 @@ def buy():
     if request.method == "POST":
 
         symbol = request.form.get("symbol")
-        shares = int(request.form.get("shares"))
+        try:
+            shares = int(request.form.get("shares"))
+        except (TypeError, ValueError):
+            return apology("must enter an integer number of shares", 400)
 
         if not symbol:
-            return apology("must enter a symbol", 403)
-        
+            return apology("must enter a symbol", 400)
+
         elif not shares:
-            return apology("must enter a number of shares", 403)
-        
+            return apology("must enter a number of shares", 400)
+
         elif shares <= 0:
-            return apology("must enter a positive number of shares", 403)
-        
+            return apology("must enter a positive number of shares", 400)
+
         elif lookup(symbol) is None:
-            return apology("invalid symbol", 403)
-        
-        usersAvailableCash = db.execute("SELECT cash FROM users WHERE id = ?", session["user_id"])[0]["cash"]
+            return apology("invalid symbol", 400)
+
+        usersAvailableCash = db.execute(
+            "SELECT cash FROM users WHERE id = ?", session["user_id"])[0]["cash"]
         price = lookup(symbol)["price"]
         netPrice = price * shares
         timestamp = datetime.now(timezone.utc).isoformat()
 
         if usersAvailableCash < netPrice:
-            return apology("balance exceeded with request", 403)
+            return apology("balance exceeded with request", 400)
 
         else:
             db.execute("INSERT INTO transactions (user_id, symbol, shares, price, timestamp, type) VALUES (?, ?, ?, ?, ?, ?)",
-                session["user_id"], symbol, shares, price, timestamp, buy
-            )            
-            db.execute("UPDATE users SET cash = cash - ? WHERE id = ?", netPrice, session["user_id"])
+                       session["user_id"], symbol, shares, price, timestamp, buy
+                       )
+            db.execute("UPDATE users SET cash = cash - ? WHERE id = ?",
+                       netPrice, session["user_id"])
 
             return redirect("/")
 
@@ -113,7 +116,8 @@ def buy():
 def history():
     """Show history of transactions"""
 
-    stocks = db.execute("SELECT symbol, shares, price, timestamp, type FROM transactions WHERE user_id = ?", session["user_id"])
+    stocks = db.execute(
+        "SELECT symbol, shares, price, timestamp, type FROM transactions WHERE user_id = ?", session["user_id"])
 
     return render_template("history.html", stocks=stocks)
 
@@ -129,11 +133,11 @@ def login():
     if request.method == "POST":
         # Ensure username was submitted
         if not request.form.get("username"):
-            return apology("must provide username", 403)
+            return apology("must provide username", 400)
 
         # Ensure password was submitted
         elif not request.form.get("password"):
-            return apology("must provide password", 403)
+            return apology("must provide password", 400)
 
         # Query database for username
         rows = db.execute(
@@ -144,7 +148,7 @@ def login():
         if len(rows) != 1 or not check_password_hash(
             rows[0]["hash"], request.form.get("password")
         ):
-            return apology("invalid username and/or password", 403)
+            return apology("invalid username and/or password", 400)
 
         # Remember which user has logged in
         session["user_id"] = rows[0]["id"]
@@ -172,15 +176,15 @@ def logout():
 @login_required
 def quote():
     """Get stock quote."""
-    
+
     if request.method == "POST":
 
         if not request.form.get("symbol"):
-            return apology("must enter a symbol", 403)
-        
+            return apology("must enter a symbol", 400)
+
         quote = lookup(request.form.get("symbol"))
         if quote is None:
-            return apology("invalid symbol", 403)
+            return apology("invalid symbol", 400)
 
         return render_template("quoted.html", **quote)
     else:
@@ -192,20 +196,21 @@ def register():
     """Register user"""
 
     if request.method == "POST":
-        
+
         if not request.form.get("username"):
-            return apology("must provide username", 403)
-        
+            return apology("must provide username", 400)
+
         elif db.execute("SELECT * FROM users WHERE username = ?", request.form.get("username")):
-            return apology("username already exists", 403)
+            return apology("username already exists", 400)
 
         elif not request.form.get("password"):
-            return apology("must provide password", 403)
-        
-        elif request.form.get("password") != request.form.get("confirmation"):
-            return apology("password must be the same as confirmation", 403)
+            return apology("must provide password", 400)
 
-        db.execute("INSERT INTO users (username, hash) VALUES (?, ?)", request.form.get("username"), generate_password_hash(request.form.get("password")))
+        elif request.form.get("password") != request.form.get("confirmation"):
+            return apology("password must be the same as confirmation", 400)
+
+        db.execute("INSERT INTO users (username, hash) VALUES (?, ?)", request.form.get(
+            "username"), generate_password_hash(request.form.get("password")))
 
         return redirect("/")
 
@@ -223,17 +228,17 @@ def sell():
     if request.method == "POST":
 
         symbol = request.form.get("symbol")
-        
+
         try:
             shares = int(request.form.get("shares"))
         except (ValueError, TypeError):
-            return apology("Invalid number of shares", 403)
-        
+            return apology("Invalid number of shares", 400)
+
         if not symbol:
-            return apology("no stock selected", 403)
-        
+            return apology("no stock selected", 400)
+
         if int(shares) < 1:
-            return apology("must enter a positive integer amount of shares", 403)
+            return apology("must enter a positive integer amount of shares", 400)
 
         row = db.execute("""
             SELECT
@@ -249,18 +254,18 @@ def sell():
         available_shares = total_bought - total_sold
 
         if available_shares <= 0:
-            return apology("no shares of that stock", 403)
-        
+            return apology("no shares of that stock", 400)
+
         if available_shares < shares:
-            return apology("not enough shares of that stock", 403)
-        
+            return apology("not enough shares of that stock", 400)
+
         price = lookup(symbol)["price"]
         netPrice = price * shares
         timestamp = datetime.now(timezone.utc).isoformat()
 
         db.execute("INSERT INTO transactions (user_id, symbol, shares, price, timestamp, type) VALUES (?, ?, ?, ?, ?, ?)",
-                session["user_id"], symbol, shares, price, timestamp, sell
-            )
+                   session["user_id"], symbol, shares, price, timestamp, sell
+                   )
 
         db.execute("UPDATE users SET cash = cash + ? WHERE id = ?", netPrice, session["user_id"])
 
@@ -278,9 +283,9 @@ def sell():
             HAVING (total_bought - total_sold) > 0
         """, session["user_id"])
 
-
         return render_template("sell.html", symbols=rows)
-    
+
+
 @app.route("/add_balance", methods=["GET", "POST"])
 @login_required
 def addBalance():
@@ -295,16 +300,17 @@ def addBalance():
             securityCode = request.form.get("securityCode")
 
             if not cardNumber or len(cardNumber) != 16 or not cardNumber.isdigit():
-                return apology("Invalid card number", 403)
+                return apology("Invalid card number", 400)
 
             if not expiryDate:
-                return apology("Enter expiry date", 403)
+                return apology("Enter expiry date", 400)
 
             if not securityCode or len(securityCode) != 3 or not securityCode.isdigit():
-                return apology("Invalid security code", 403)
+                return apology("Invalid security code", 400)
 
             paymentDetails = generate_password_hash(cardNumber + expiryDate + securityCode)
-            db.execute("UPDATE users SET paymentMethod = ? WHERE id = ?", paymentDetails, session["user_id"])
+            db.execute("UPDATE users SET paymentMethod = ? WHERE id = ?",
+                       paymentDetails, session["user_id"])
 
             return redirect("/add_balance")
 
@@ -312,11 +318,11 @@ def addBalance():
         timestamp = datetime.now(timezone.utc).isoformat()
 
         if not amount or not amount.isdigit() or int(amount) <= 0:
-            return apology("Enter a valid amount", 403)
+            return apology("Enter a valid amount", 400)
 
         db.execute("UPDATE users SET cash = cash + ? WHERE id = ?", int(amount), session["user_id"])
         db.execute("INSERT INTO transactions (user_id, price, timestamp, type) VALUES (?, ?, ?, ?)",
-                session["user_id"], int(amount), timestamp, add)
+                   session["user_id"], int(amount), timestamp, add)
 
         return redirect("/")
 
@@ -325,7 +331,8 @@ def addBalance():
         return render_template("registerPaymentDetails.html")
     else:
         return render_template("addBalance.html")
-    
+
+
 @app.route("/change_password", methods=["GET", "POST"])
 @login_required
 def change():
@@ -338,21 +345,22 @@ def change():
         confirmation = request.form.get("confirmation")
 
         if not oldPassword:
-            return apology("must enter old password", 403)
-        
+            return apology("must enter old password", 400)
+
         hash = db.execute("SELECT hash FROM users WHERE id = ?", session["user_id"])
 
         if generate_password_hash(oldPassword) != hash:
-            return apology("must enter correct old password", 403)
-        
+            return apology("must enter correct old password", 400)
+
         elif not newPassword:
-            return apology("must enter new password", 403)
-        
+            return apology("must enter new password", 400)
+
         elif newPassword != confirmation:
-            return apology("new password must be the same as confirmation", 403)
-        
-        db.execute("UPDATE users SET hash = ? WHERE id = ?", generate_password_hash(newPassword), session["user_id"])
+            return apology("new password must be the same as confirmation", 400)
+
+        db.execute("UPDATE users SET hash = ? WHERE id = ?",
+                   generate_password_hash(newPassword), session["user_id"])
         return redirect("/")
-    
+
     else:
         return render_template("changePassword.html")
