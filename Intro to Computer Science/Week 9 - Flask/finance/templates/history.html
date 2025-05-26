@@ -18,14 +18,26 @@
         </thead>
         <tbody>
             {% for stock in stocks %}
-            {% set netPrice = stock.shares * stock.price %}
-            <tr class="{% if stock.type == 0 %}buy-row{% else %}sell-row{% endif %}">
+            {% if stock.shares is none %}
+                {% set netPrice = stock.price %}
+            {% else %}
+                {% set netPrice = stock.shares * stock.price %}
+            {% endif %}
+            <tr class="{% if stock.type == 0 %}buy-row{% elif stock.type == 1 %}sell-row{% else %}other-row{% endif %}">
                 <td>{{ stock.symbol }}</td>
                 <td>{{ stock.shares }}</td>
                 <td>{{ stock.price | usd }}</td>
                 <td>{{ netPrice | usd }}</td>
                 <td><span class="utc-time">{{ stock.timestamp }}</span></td>
-                <td>{{ 'Buy' if stock.type == 0 else 'Sell' }}</td>
+                <td>
+                    {% if stock.type == 0 %}
+                        Buy
+                    {% elif stock.type == 2 %}
+                        Add
+                    {% else %}
+                        Sell
+                    {% endif %}
+                </td>
             </tr>
             {% endfor %}
         </tbody>

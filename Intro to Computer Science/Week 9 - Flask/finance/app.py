@@ -46,17 +46,14 @@ def index():
         GROUP BY symbol
     """, session["user_id"])
     
-    try: 
-        grand_total = 0
-        for stock in stocks:
-            stock["currentPrice"] = lookup(stock["symbol"])["price"]
-            stock["total"] = stock["shares"] * stock["currentPrice"]
-            grand_total += stock["total"]
-    except TypeError:
-        grand_total = 0
-        for stock in stocks:
-            stock["currentPrice"] = 0
-            stock["total"] = 0
+    stocks = [stock for stock in stocks if stock["shares"] and stock["shares"] > 0]
+    
+    grand_total = 0
+    for stock in stocks:
+        stock["currentPrice"] = lookup(stock["symbol"])["price"]
+        stock["total"] = stock["shares"] * stock["currentPrice"]
+        grand_total += stock["total"]
+
 
 
     cash = db.execute("SELECT cash FROM users WHERE id = ?", session["user_id"])[0]["cash"]
@@ -236,7 +233,7 @@ def sell():
             return apology("no stock selected", 403)
         
         if int(shares) < 1:
-            return apology("you must enter a positive integer amount of shares", 403)
+            return apology("must enter a positive integer amount of shares", 403)
 
         row = db.execute("""
             SELECT
@@ -252,10 +249,10 @@ def sell():
         available_shares = total_bought - total_sold
 
         if available_shares <= 0:
-            return apology("you do not have any shares of that stock", 403)
+            return apology("no shares of that stock", 403)
         
         if available_shares < shares:
-            return apology("you do not have enough shares of that stock", 403)
+            return apology("not enough shares of that stock", 403)
         
         price = lookup(symbol)["price"]
         netPrice = price * shares
@@ -284,55 +281,78 @@ def sell():
 
         return render_template("sell.html", symbols=rows)
     
-@app.route("/add", methods=["GET", "POST"])
+@app.route("/add_balance", methods=["GET", "POST"])
 @login_required
-def add():
+def addBalance():
     """Add additional cash to account"""
 
+    add = 2
+
     if request.method == "POST":
+        if "cardNumber" in request.form:
+            cardNumber = request.form.get("cardNumber")
+            expiryDate = request.form.get("expiryDate")
+            securityCode = request.form.get("securityCode")
 
+            if not cardNumber or len(cardNumber) != 16 or not cardNumber.isdigit():
+                return apology("Invalid card number", 403)
 
-        cardNumber = request.form.get("cardNumber")
-        expiryDate = request.form.get("expiryDate")
-        securityCode = request.form.get("securityCode")
+            if not expiryDate:
+                return apology("Enter expiry date", 403)
 
-        if not cardNumber:
-            return apology("please enter a card number", 403)
-        
-        if len(cardNumber) != 16:
-            return apology("please enter a correct number of digits for the card number", 403)
-        
-        if not expiryDate:
-            return apology("please enter an expiry date", 403)
-        
-        if not securityCode:
-            return apology("please enter a security code", 403)
-        
-        if len(securityCode) != 3:
-            return apology("please enter a correct number of digits for the security code", 403)
-        
-        paymentDetails = generate_password_hash(str(cardNumber) + str(expiryDate) + str(securityCode))
+            if not securityCode or len(securityCode) != 3 or not securityCode.isdigit():
+                return apology("Invalid security code", 403)
 
-        if not paymentDetails:
-            return apology("error with generating payment details", 401)
+            paymentDetails = generate_password_hash(cardNumber + expiryDate + securityCode)
+            db.execute("UPDATE users SET paymentMethod = ? WHERE id = ?", paymentDetails, session["user_id"])
 
-        db.execute("UPDATE users SET paymentMethod = ? WHERE id = ?", paymentDetails, session["user_id"])
-
-        render_template("addBalance.html")
+            return redirect("/add_balance")
 
         amount = request.form.get("amount")
+        timestamp = datetime.now(timezone.utc).isoformat()
 
-        if not amount:
-            return apology("please enter an amount to add", 403)
-        
-        if int(amount) < 1:
-            return apology("please enter a positive integer", 403)
-        
-        db.execute("UPDATE users SET cash = cash + ? WHERE id = ?", amount, session["user_id"])
+        if not amount or not amount.isdigit() or int(amount) <= 0:
+            return apology("Enter a valid amount", 403)
+
+        db.execute("UPDATE users SET cash = cash + ? WHERE id = ?", int(amount), session["user_id"])
+        db.execute("INSERT INTO transactions (user_id, price, timestamp, type) VALUES (?, ?, ?, ?)",
+                session["user_id"], int(amount), timestamp, add)
 
         return redirect("/")
 
-    elif db.execute("SELECT paymentMethod FROM users WHERE id = ?", session["user_id"]) == None:
+    result = db.execute("SELECT paymentMethod FROM users WHERE id = ?", session["user_id"])
+    if not result or not result[0]["paymentMethod"]:
         return render_template("registerPaymentDetails.html")
     else:
         return render_template("addBalance.html")
+    
+@app.route("/change_password", methods=["GET", "POST"])
+@login_required
+def change():
+    """Change account password"""
+
+    if request.method == "POST":
+
+        oldPassword = request.form.get("oldPassword")
+        newPassword = request.form.get("newPassword")
+        confirmation = request.form.get("confirmation")
+
+        if not oldPassword:
+            return apology("must enter old password", 403)
+        
+        hash = db.execute("SELECT hash FROM users WHERE id = ?", session["user_id"])
+
+        if generate_password_hash(oldPassword) != hash:
+            return apology("must enter correct old password", 403)
+        
+        elif not newPassword:
+            return apology("must enter new password", 403)
+        
+        elif newPassword != confirmation:
+            return apology("new password must be the same as confirmation", 403)
+        
+        db.execute("UPDATE users SET hash = ? WHERE id = ?", generate_password_hash(newPassword), session["user_id"])
+        return redirect("/")
+    
+    else:
+        return render_template("changePassword.html")
