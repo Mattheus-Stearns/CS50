@@ -1,0 +1,3 @@
+Idea:
+
+Web App that integrates fully with google, so that I can get used to google APIs
