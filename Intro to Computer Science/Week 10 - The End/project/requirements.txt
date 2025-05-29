@@ -3,3 +3,5 @@ Flask-Session
 pytz
 requests
 datetime
+Authlib
+python-dotenv
