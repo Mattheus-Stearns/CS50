@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Google Docs
+{% endblock %}
+
+{% block main %}
+    <h2>Google Docs Automation</h2>
+    <p>First, it is necessary that you submit the url to the google doc that you want to use this WebApp in, and it is necessary that you have read and write permissions 
+        in that doc. It should be in the form <u>https://docs.google.com/document/d/<i>DOCUMENT_ID</i>/edit</u> .</p>
+
+    <form action="/docs" method="post">
+        <div class="mb-3">
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" name="link" placeholder="Google Docs Link" type="text" value="{{ values.link or '' }}">
+        </div>
+        {% if errors.link %}
+            <div class="text-danger">{{ errors.link }}</div>
+        {% endif %}
+        <div class="mb-3">
+            <textarea autocomplete="off" autofocus class="form-control mx-auto w-auto" name="text" placeholder="Text to insert">{{ values.text or '' }}</textarea>
+        </div>
+        {% if errors.text %}
+            <div class="text-danger">{{ errors.text }}</div>
+        {% endif %}
+        <button class="btn btn-primary" type="submit">Submit</button>
+    </form>
+{% endblock %}
+
