@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Login
+{% endblock %}
+
+{% block main %}
+    <h1>Welcome to Google Automota!</h1>
+
+    <p>It is necessary that you login with your google account to use google's integrations, otherwise this app cannot function! </p>
+
+    <form action="/login" method="post">
+        <button class="btn btn-primary" type="submit">Log In With Google</button>
+    </form>
+{% endblock %}

@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 
 # Configure application
 app = Flask(__name__)
+load_dotenv()
 app.secret_key = os.getenv("SECRET_KEY")
 
 # Configure session to use filesystem
@@ -32,12 +33,11 @@ google = oauth.register(
     client_id=os.getenv("GOOGLE_CLIENT_ID"),
     client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
     access_token_url='https://oauth2.googleapis.com/token',
-    access_token_params=None,
     authorize_url='https://accounts.google.com/o/oauth2/v2/auth',
-    authorize_params={'prompt': 'consent', 'access_type': 'offline'},
     api_base_url='https://www.googleapis.com/oauth2/v2/',
-    userinfo_endpoint='https://www.googleapis.com/oauth2/v2/userinfo',  # Needed for fetching user info
-    client_kwargs={'scope': 'openid email profile'},
+    client_kwargs={
+        'scope': 'email profile',  # No 'openid'
+    }
 )
 
 # Decorate routes to require login.
@@ -55,18 +55,32 @@ def index():
     user = session.get('user')
     return render_template("index.html", user=user)
 
-@app.route("/login")
+@app.route("/login", methods=["GET", "POST"])
 def login():
-    redirect_uri = url_for('auth_callback', _external=True)
-    return google.authorize_redirect(redirect_uri)
+
+    if request.method == "POST":
+
+        redirect_uri = url_for('auth_callback', _external=True)
+        return google.authorize_redirect(redirect_uri)
+    
+    else:
+        return render_template("login.html")
+    
 
 @app.route('/auth/callback')
 def auth_callback():
-    token = google.authorize_access_token()
-    resp = google.get('userinfo')
-    user_info = resp.json()
-    session['user'] = user_info
-    return redirect('/')
+    try:
+        token = google.authorize_access_token()
+        print("Token:", token)
+        user_info = google.get('userinfo').json()
+        print("User info:", user_info)
+        session['user'] = user_info
+        session['user_id'] = user_info['id']
+        return redirect('/')
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return f"Login failed: {e}"
 
 @app.route('/logout')
 def logout():
