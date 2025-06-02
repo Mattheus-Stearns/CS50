@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Google Mail
+{% endblock %}
+
+{% block main %}
+    <h2>Google Mail Automation</h2>
+    <p></p>
+
+    <form action="/mail" method="post">
+        <div class="mb-3">
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" name="destination" placeholder="Send eMail to..." type="email" value="{{ values.get('destination', '') or '' }}">
+        </div>
+        {% if errors.destination %}
+            <div class="text-danger">{{ errors.get('destination', '') }}</div>
+        {% endif %}
+        <div class="mb-3">
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" name="copy" placeholder="Copy (CC) eMail to..." type="email" value="{{ values.get('copy', '') or '' }}">
+        </div>
+        {% if errors.copy %}
+            <div class="text-danger">{{ errors.get('copy', '') }}</div>
+        {% endif %}
+        <div class="mb-3">
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" name="subject" placeholder="Subject of the eMail..." type="text" value="{{  values.get('subject', '') or '' }}">
+        </div>
+        {% if errors.subject %}
+            <div class="text-danger">{{ errors.get('subject', '') }}</div>
+        {% endif %}
+        <div class="mb-3">
+            <textarea autocomplete="off" autofocus class="form-control mx-auto w-auto" name="text" placeholder="Message to be sent...">{{  values.get('text', '') or '' }}</textarea>
+        </div>
+        {% if errors.text %}
+            <div class="text-danger">{{ errors.get('text', '') }}</div>
+        {% endif %}
+        <button class="btn btn-primary" type="submit">Submit</button>
+    </form>
+{% endblock %}

@@ -10,6 +10,9 @@ from dotenv import load_dotenv
 import re
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
+from email_validator import validate_email, EmailNotValidError
+import base64
+from email.mime.text import MIMEText
 
 # Configure application
 app = Flask(__name__)
@@ -39,7 +42,7 @@ google = oauth.register(
     authorize_url='https://accounts.google.com/o/oauth2/v2/auth',
     api_base_url='https://www.googleapis.com/oauth2/v2/',
     client_kwargs={
-        'scope': 'email profile https://www.googleapis.com/auth/documents'
+        'scope': 'email profile https://www.googleapis.com/auth/documents https://www.googleapis.com/auth/gmail.send'
     }
 )
 
@@ -84,12 +87,15 @@ def auth_callback():
     try:
         token = google.authorize_access_token()
         session['credentials'] = {
-        'token': token['access_token'],
-        'refresh_token': token.get('refresh_token'),
-        'token_uri': 'https://oauth2.googleapis.com/token',
-        'client_id': os.getenv("GOOGLE_CLIENT_ID"),
-        'client_secret': os.getenv("GOOGLE_CLIENT_SECRET"),
-        'scopes': ['https://www.googleapis.com/auth/documents']
+            'token': token['access_token'],
+            'refresh_token': token.get('refresh_token'),
+            'token_uri': 'https://oauth2.googleapis.com/token',
+            'client_id': os.getenv("GOOGLE_CLIENT_ID"),
+            'client_secret': os.getenv("GOOGLE_CLIENT_SECRET"),
+            'scopes': [
+                'https://www.googleapis.com/auth/documents',
+                'https://www.googleapis.com/auth/gmail.send'
+            ]
         }
         print("Token:", token)
         user_info = google.get('userinfo').json()
@@ -109,6 +115,69 @@ def logout():
     session.pop('user', None)
     return redirect('/')
 
+# Mail Automation Implementation
+@app.route("/mail", methods=["GET", "POST"])
+@login_required
+def mail():
+    if request.method == "POST":
+        errors = {}
+        destination = request.form.get("destination")
+        copy = request.form.get("copy")
+        subject = request.form.get("subject")
+        text = request.form.get("text")
+
+        if not destination:
+            errors["destination"] = "Destination is required."
+        if not subject:
+            errors["subject"] = "Subject is required."
+        if not text:
+            errors["text"] = "Message text is required."
+
+        # These only check if the addresses are in the correct format, to check if the adresses exist you need a paid api
+        try:
+            destination = validate_email(destination).email
+        except EmailNotValidError as e:
+            errors["destination"] = str(e)
+
+        if copy:
+            try:
+                copy = validate_email(copy).email
+            except EmailNotValidError as e:
+                errors["copy"] = str(e)
+        
+        if errors:
+            return render_template("mail.html", errors=errors, values=request.form.copy())
+        
+        creds_data = session.get('credentials')
+        if not creds_data:
+            return "Authentication credentials not found. Please log in again.", 401
+
+        creds = Credentials(**creds_data)
+        mail_service = build('gmail', 'v1', credentials=creds)
+
+        message = MIMEText(text)
+        message['to'] = destination
+        if copy:
+            message['cc'] = copy
+        message['from'] = session['user']['email']
+        message['subject'] = subject
+
+        raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
+
+        try:
+            send_result = mail_service.users().messages().send(
+                userId='me',
+                body={'raw': raw_message}
+            ).execute()
+        except Exception as e:
+            errors['send_error'] = f"Failed to send email: {e}"
+            return render_template("mail.hmtl", errors=errors, values=request.form.copy())
+
+        return redirect("/")
+    
+    else:
+        return render_template("mail.html", errors={}, values={})
+
 # Docs Automation Implementation
 @app.route("/docs", methods=["GET", "POST"])
 @login_required
@@ -120,20 +189,20 @@ def docs():
 
         if not link:
             errors["link"] = "Link is required."
-        elif not DOCS_URL_PATTERN.match(link):
+        if not DOCS_URL_PATTERN.match(link):
             errors["link"] = "Invalid Google Docs link format."
         
         if not text_to_insert.strip():
             errors["text"] = "Text to insert is required."
 
         if errors:
-            return render_template("docs.html", errors=errors, values=request.form)
+            return render_template("docs.html", errors=errors, values=request.form.copy())
         
         document_id = DOCS_URL_PATTERN.match(link).group(1)
         creds_data = session.get('credentials')
 
         if not creds_data:
-            return "User not authenticated.", 401
+            return "Authentication credentials not found. Please log in again.", 401
 
         creds = Credentials(**creds_data)
         docs_service = build('docs', 'v1', credentials=creds)
@@ -157,7 +226,7 @@ def docs():
             return redirect("/")
         except Exception as e:
             errors['api'] = f"Failed to insert text: {e}"
-            return render_template("docs.html", errors=errors, values=request.form)
+            return render_template("docs.html", errors=errors, values=request.form())
 
     else:
         return render_template("docs.html", errors={}, values={})
