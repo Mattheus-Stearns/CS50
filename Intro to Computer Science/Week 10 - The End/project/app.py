@@ -14,6 +14,7 @@ from email_validator import validate_email, EmailNotValidError
 import base64
 from email.mime.text import MIMEText
 import pytz
+import urllib.parse
 
 # Configure application
 app = Flask(__name__)
@@ -437,15 +438,24 @@ def forms():
 @login_required
 def search():
     if request.method == "POST":
-        pass
+        errors = {}
+        query = request.form.get("query")
+        action = request.form.get("action")
+
+        if not query:
+            errors["query"] = "Search is required."
+
+        if errors:
+            return render_template("forms.html", errors=errors, values=request.form.copy())
+        
+        encoded_query = urllib.parse.quote_plus(query)
+
+        if action == "search":
+            url = f"https://www.google.com/search?q={encoded_query}"
+        elif action == "lucky":
+            url = f"https://www.google.com/search?q={encoded_query}&btnI=I"        
+
+        return render_template("sheets.html", redirect_url=url, back_url="/", errors={}, values={})
+        
     else:
         return render_template("search.html", errors={}, values={})
-
-# News Automation Implementation
-@app.route("/news", methods=["GET", "POST"])
-@login_required
-def news():
-    if request.method == "POST":
-        pass
-    else:
-        return render_template("news.html", errors={}, values={})
