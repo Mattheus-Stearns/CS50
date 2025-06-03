@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Google Calendar
+{% endblock %}
+
+{% block main %}
+    <h2>Google Calendar Automation</h2>
+    <p>Sadly, we currently only support one guest maximum to any event. That said, adding a guest or description is optional. However, the title and time of the event is not optional.</p>
+
+    <form action="/calendar" method="post">
+        <div class="mb-3">
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" name="title" placeholder="Title of the event..." type="text" value="{{ values.get('title', '') or '' }}">
+        </div>
+        {% if errors.title %}
+            <div class="text-danger">{{ errors.get('title', '') }}</div>
+        {% endif %}
+        <div class="mb-3">
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" name="guest" placeholder="Invite this person to the event..." type="email" value="{{ values.get('guest', '') or '' }}">
+        </div>
+        {% if errors.guest %}
+            <div class="text-danger">{{ errors.get('guest', '') }}</div>
+        {% endif %}
+        <div class="mb-3">
+            <input autofocus class="form-control mx-auto w-auto" type="datetime-local" id="datetime" name="time" value="{{ values.get('time', '') or '' }}">
+        </div>
+        {% if errors.time %}
+            <div class="text-danger">{{ errors.get('time', '') }}</div>
+        {% endif %}
+        <div class="mb-3">
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" name="description" placeholder="Description of the event..." value="{{  values.get('text', '') or '' }}">
+        </div>
+        {% if errors.description %}
+            <div class="text-danger">{{ errors.get('description', '') }}</div>
+        {% endif %}
+        <input type="hidden" name="timezone" id="timezone">
+        <button class="btn btn-primary" type="submit">Create Event</button>
+        {% if errors.api %}
+            <div class="text-danger">{{ errors.get('api', '') }}</div>
+        {% endif %}
+    </form>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/timezone.js') }}"></script>
+{% endblock %}

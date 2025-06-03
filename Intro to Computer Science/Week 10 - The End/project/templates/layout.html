@@ -10,7 +10,6 @@
 
         <!-- Relating to external documents -->
         <link href="/static/styles.css" rel="stylesheet">
-        <script src="/static/scripts.js" defer></script>
         <link href="/static/favicon.ico" rel="icon">
 
         <!-- Linking to Bootstrap -->
@@ -65,6 +64,9 @@
                 Project made by <a href="https://github.com/Mattheus-Stearns">Mattheus Stearns</a> in response to <a href="https://cs50.harvard.edu/x/project/">CS50's 2025 Introduction to Computer Science Final Project</a>.
             </p>
         </footer>
+
+        {% block scripts %}
+        {% endblock %}
 
     </body>
 

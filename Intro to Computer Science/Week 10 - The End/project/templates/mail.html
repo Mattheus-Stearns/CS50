@@ -6,7 +6,7 @@
 
 {% block main %}
     <h2>Google Mail Automation</h2>
-    <p></p>
+    <p>It is necessary that you include the address of the person that you want to send an email to, the subject of the email and the message, for it to be sent. </p>
 
     <form action="/mail" method="post">
         <div class="mb-3">
@@ -33,6 +33,6 @@
         {% if errors.text %}
             <div class="text-danger">{{ errors.get('text', '') }}</div>
         {% endif %}
-        <button class="btn btn-primary" type="submit">Submit</button>
+        <button class="btn btn-primary" type="submit">Send</button>
     </form>
 {% endblock %}

@@ -4,7 +4,7 @@ import os
 from flask import Flask, flash, redirect, render_template, request, session, url_for, send_file
 from functools import wraps
 from flask_session import Session
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from authlib.integrations.flask_client import OAuth
 from dotenv import load_dotenv
 import re
@@ -13,6 +13,7 @@ from googleapiclient.discovery import build
 from email_validator import validate_email, EmailNotValidError
 import base64
 from email.mime.text import MIMEText
+import pytz
 
 # Configure application
 app = Flask(__name__)
@@ -42,7 +43,7 @@ google = oauth.register(
     authorize_url='https://accounts.google.com/o/oauth2/v2/auth',
     api_base_url='https://www.googleapis.com/oauth2/v2/',
     client_kwargs={
-        'scope': 'email profile https://www.googleapis.com/auth/documents https://www.googleapis.com/auth/gmail.send'
+        'scope': 'email profile https://www.googleapis.com/auth/documents https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/calendar.events'
     }
 )
 
@@ -94,7 +95,8 @@ def auth_callback():
             'client_secret': os.getenv("GOOGLE_CLIENT_SECRET"),
             'scopes': [
                 'https://www.googleapis.com/auth/documents',
-                'https://www.googleapis.com/auth/gmail.send'
+                'https://www.googleapis.com/auth/gmail.send',
+                'https://www.googleapis.com/auth/calendar.events'
             ]
         }
         print("Token:", token)
@@ -177,6 +179,78 @@ def mail():
     
     else:
         return render_template("mail.html", errors={}, values={})
+    
+# Calendar Automation Implementation
+@app.route("/calendar", methods=["GET", "POST"])
+@login_required
+def calendar():
+    if request.method == "POST":
+        errors = {}
+        title = request.form.get("title")
+        guest = request.form.get("guest")
+        time = request.form.get("time")
+        description = request.form.get("description")
+        timezone = request.form.get("timezone", "UTC")
+
+        if not title:
+            errors["title"] = "Title is required."
+        
+        if not time:
+            errors["time"] = "Time is required."
+
+        if guest:
+            try:
+                guest = validate_email(guest).email
+            except EmailNotValidError as e:
+                errors["guest"] = str(e)
+        
+        try:
+            dt = datetime.strptime(time, "%Y-%m-%dT%H:%M")
+        except (ValueError, TypeError):
+            errors["time"] = "Please enter a valid date and time."
+        
+        if dt < datetime.now():
+            errors["time"] = "Please select a future date and time."
+
+        if timezone not in pytz.all_timezones:
+            timezone = "UTC"
+
+        if errors:
+            return render_template("calendar.html", errors=errors, values=request.form.copy())
+        
+        creds_data = session.get('credentials')
+        if not creds_data:
+            return "Authentication credentials not found. Please log in again.", 401
+        
+        creds = Credentials(**creds_data)
+        calendar_service = build('calendar', 'v3', credentials=creds)
+
+        event = {
+            'summary': title,
+            'description': description,
+            'start': {
+                'dateTime': dt.isoformat(),
+                'timeZone': timezone,
+            },
+            'end': {
+                'dateTime': (dt + timedelta(hours=1)).isoformat(),
+                'timeZone': timezone,
+            },
+        }
+
+        if guest:
+            event['attendees'] = [{'email': guest}]
+
+        try:
+            calendar_service.events().insert(calendarId='primary', body=event, sendUpdates='all').execute()
+            flash("Event successfully created in Google Calendar!", "success")
+            return redirect("/")
+        except Exception as e:
+            errors["api"] = f"Failed to create event: {e}"
+            return render_template("calendar.html", errors=errors, values=request.form.copy())
+
+    else:
+        return render_template("calendar.html", errors={}, values={})
 
 # Docs Automation Implementation
 @app.route("/docs", methods=["GET", "POST"])

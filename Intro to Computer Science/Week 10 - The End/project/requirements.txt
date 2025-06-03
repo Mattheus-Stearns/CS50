@@ -2,7 +2,6 @@ Flask
 Flask-Session
 pytz
 requests
-datetime
 Authlib
 python-dotenv
 google-api-python-client
