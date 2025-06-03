@@ -1,0 +1,42 @@
+In terms of implementing multiple functions, have a form with different options of functions at the of the individual pages,
+and an event listener in js that then switches the mode, and the error checking of submittions and use of code in app.py
+
+e.g.
+
+UI:
+
+–––––––––––––––––––––––
+                -> Send Email
+    Fuction     -> Search Email
+                -> Delete Email
+–––––––––––––––––––––––
+
+note: display the chosen function to the user
+
+FRONT END:
+
+{% if function.send %}
+    yadayada
+{% endif %}
+{% if function.search %}
+    yadayada
+{% endif %}
+{% if function.delete %}
+    yadayada
+{% endif %}
+
+note: pass the flags in render_template()
+
+BACK END:
+
+have the forms submit to different subroutes, so they can post and get under different headers, e.g.:
+
+@app.route("/calendar/create", methods=["POST"])
+@login_required
+def calendar_create():
+    return create_event()
+
+@app.route("/calendar/next", methods=["GET"])
+@login_required
+def calendar_next():
+    return get_next_event_info()
