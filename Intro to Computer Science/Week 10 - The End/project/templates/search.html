@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Google Search
+{% endblock %}
+
+{% block main %}
+    <h2>Google Search Automation</h2>
+
+
+
+    <form action="/search" method="post">
+        <div class="d-flex mb-3">
+            <input autocomplete="off" autofocus class="form-control me-2" name="query" placeholder="Search Google..." type="text" value="{{ values.query or '' }}">
+            <button class="btn btn-primary" type="submit">Search</button>
+        </div>
+        {% if errors.query %}
+            <div class="text-danger">{{ errors.query }}</div>
+        {% endif %}
+    </form>
+
+    {% if redirect_url %}
+        <span data-redirect-url="{{ redirect_url }}" data-back-url="{{ back_url or '/' }}" style="display: none;"></span>
+    {% endif %}
+{% endblock %}
+
+{% block scripts %}
+    {% if redirect_url %}
+        <script src="{{ url_for('static', filename='js/redirect.js') }}"></script>
+    {% endif %}
+{% endblock %}

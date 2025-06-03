@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Google Sheets
+{% endblock %}
+
+{% block main %}
+    <h2>Google Sheets Automation</h2>
+    <p>First, it is necessary that you submit the url to the google sheet that you want to use this WebApp in, and it is necessary that you have read and write permissions 
+        in that sheet. It should be in the form <u>https://docs.google.com/spreadsheets/d/<i>DOCUMENT_ID</i>/edit</u> . Then, the cell must be inputted with A1 notation, a character from A to ZZZ followed by a number.
+        The text that you are inserting is also a required field.
+    </p>
+
+
+    <form action="/sheets" method="post">
+        <div class="mb-3">
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" name="link" placeholder="Google Sheets Link" type="text" value="{{ values.link or '' }}">
+        </div>
+        {% if errors.link %}
+            <div class="text-danger">{{ errors.link }}</div>
+        {% endif %}
+        <div class="mb-3">
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" name="cell" placeholder="Google Sheets Cell" type="text" value="{{ values.cell or '' }}">
+        </div>
+        {% if errors.cell %}
+            <div class="text-danger">{{ errors.cell }}</div>
+        {% endif %}
+        <div class="mb-3">
+            <textarea autocomplete="off" autofocus class="form-control mx-auto w-auto" name="text" placeholder="Text to insert">{{ values.text or '' }}</textarea>
+        </div>
+        {% if errors.text %}
+            <div class="text-danger">{{ errors.text }}</div>
+        {% endif %}
+        <button class="btn btn-primary" type="submit">Insert</button>
+        {% if errors.api %}
+            <div class="text-danger">{{ errors.get('api', '') }}</div>
+        {% endif %}
+    </form>
+
+    {% if redirect_url %}
+        <span data-redirect-url="{{ redirect_url }}" data-back-url="{{ back_url or '/' }}" style="display: none;"></span>
+    {% endif %}
+{% endblock %}
+
+{% block scripts %}
+    {% if redirect_url %}
+        <script src="{{ url_for('static', filename='js/redirect.js') }}"></script>
+    {% endif %}
+{% endblock %}

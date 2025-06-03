@@ -23,6 +23,19 @@
             <div class="text-danger">{{ errors.text }}</div>
         {% endif %}
         <button class="btn btn-primary" type="submit">Append</button>
+        {% if errors.api %}
+            <div class="text-danger">{{ errors.get('api', '') }}</div>
+        {% endif %}
     </form>
+
+    {% if redirect_url %}
+        <span data-redirect-url="{{ redirect_url }}" data-back-url="{{ back_url or '/' }}" style="display: none;"></span>
+    {% endif %}
+{% endblock %}
+
+{% block scripts %}
+    {% if redirect_url %}
+        <script src="{{ url_for('static', filename='js/redirect.js') }}"></script>
+    {% endif %}
 {% endblock %}
 

@@ -43,7 +43,16 @@ google = oauth.register(
     authorize_url='https://accounts.google.com/o/oauth2/v2/auth',
     api_base_url='https://www.googleapis.com/oauth2/v2/',
     client_kwargs={
-        'scope': 'email profile https://www.googleapis.com/auth/documents https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/calendar.events'
+        'scope': (
+            'email profile '
+            'https://www.googleapis.com/auth/documents '
+            'https://www.googleapis.com/auth/gmail.send '
+            'https://www.googleapis.com/auth/calendar.events '
+            'https://www.googleapis.com/auth/spreadsheets '
+            'https://www.googleapis.com/auth/drive.readonly '
+            'https://www.googleapis.com/auth/forms '
+            'https://www.googleapis.com/auth/forms.responses.readonly'
+        )
     }
 )
 
@@ -67,8 +76,24 @@ def inject_user():
 def index():
     return render_template("index.html")
 
-# Defining URL Patterns
-DOCS_URL_PATTERN = re.compile(r"^https://docs\.google\.com/document/d/([a-zA-Z0-9_-]+)/edit(\?.*)?$")
+# Defining Patterns
+DOCS_URL_PATTERN = re.compile(r"^https://docs\.google\.com/document/d/([a-zA-Z0-9_-]+)/edit(.*)?$")
+SHEETS_URL_PATTERN = re.compile(r"^https://docs\.google\.com/spreadsheets/d/([a-zA-Z0-9_-]+)/edit(.*)?$")
+FORMS_URL_PATTERN = re.compile(r"^https://docs\.google\.com/forms/d/([a-zA-Z0-9_-]+)/edit(.*)?$")
+CELL_PATTERN = re.compile(r"^[A-Za-z]{1,3}[1-9][0-9]*$")
+
+# Normalizing URLs
+def normalize_url(url, pattern):
+    match = pattern.match(url)
+    if not match:
+        return None
+    
+    file_id = match.group(1)
+    idx = url.find(file_id)
+    if idx == -1:
+        return None
+
+    return url[:idx] + file_id + "/edit"
 
 # Login Process, calling google's redirect uri
 @app.route("/login", methods=["GET", "POST"])
@@ -96,7 +121,11 @@ def auth_callback():
             'scopes': [
                 'https://www.googleapis.com/auth/documents',
                 'https://www.googleapis.com/auth/gmail.send',
-                'https://www.googleapis.com/auth/calendar.events'
+                'https://www.googleapis.com/auth/calendar.events',
+                'https://www.googleapis.com/auth/spreadsheets',
+                'https://www.googleapis.com/auth/drive.readonly',
+                'https://www.googleapis.com/auth/forms',
+                'https://www.googleapis.com/auth/forms.responses.readonly'
             ]
         }
         print("Token:", token)
@@ -175,7 +204,8 @@ def mail():
             errors['send_error'] = f"Failed to send email: {e}"
             return render_template("mail.hmtl", errors=errors, values=request.form.copy())
 
-        return redirect("/")
+        mail_url = f'https://mail.google.com/mail/?authuser={session["user"]["email"]}#sent'
+        return render_template("mail.html", redirect_url=mail_url, back_url="/", errors={}, values={})
     
     else:
         return render_template("mail.html", errors={}, values={})
@@ -242,12 +272,15 @@ def calendar():
             event['attendees'] = [{'email': guest}]
 
         try:
-            calendar_service.events().insert(calendarId='primary', body=event, sendUpdates='all').execute()
+            created_event = calendar_service.events().insert(calendarId='primary', body=event, sendUpdates='all').execute()
+            redirect_url = created_event.get("htmlLink")
             flash("Event successfully created in Google Calendar!", "success")
-            return redirect("/")
         except Exception as e:
             errors["api"] = f"Failed to create event: {e}"
             return render_template("calendar.html", errors=errors, values=request.form.copy())
+        
+        redirect_url = f'{redirect_url}&authuser={session["user"]["email"]}'
+        return render_template("calendar.html", redirect_url=redirect_url, back_url="/", errors={}, values={})
 
     else:
         return render_template("calendar.html", errors={}, values={})
@@ -273,6 +306,7 @@ def docs():
             return render_template("docs.html", errors=errors, values=request.form.copy())
         
         document_id = DOCS_URL_PATTERN.match(link).group(1)
+        link = normalize_url(link, DOCS_URL_PATTERN)
         creds_data = session.get('credentials')
 
         if not creds_data:
@@ -297,10 +331,121 @@ def docs():
                 documentId=document_id,
                 body={'requests': requests}
             ).execute()
-            return redirect("/")
         except Exception as e:
             errors['api'] = f"Failed to insert text: {e}"
             return render_template("docs.html", errors=errors, values=request.form())
 
+        return render_template("docs.html", redirect_url=link, back_url="/", errors={}, values={})
+
     else:
         return render_template("docs.html", errors={}, values={})
+    
+# Sheets Automation Implementation
+@app.route("/sheets", methods=["GET", "POST"])
+@login_required
+def sheets():
+    if request.method == "POST":
+        errors = {}
+        link = request.form.get("link")
+        cell = request.form.get("cell")
+        text = request.form.get("text")
+
+        if not link:
+            errors["link"] = "Link is required."
+        if not SHEETS_URL_PATTERN.match(link):
+            errors["link"] = "Invalid Google Sheets link format."
+        
+        if not cell:
+            errors["cell"] = "Cell is required."
+        if not CELL_PATTERN.match(cell):
+            errors["cell"] = "Invalid cell format."
+        
+        if not text.strip():
+            errors["text"] = "Text to insert is required."
+
+        if errors:
+            return render_template("sheets.html", errors=errors, values=request.form.copy())
+        
+        sheet_id = SHEETS_URL_PATTERN.match(link).group(1)
+        link = normalize_url(link, SHEETS_URL_PATTERN)
+        creds_data = session.get('credentials')
+
+        if not creds_data:
+            return "Authentication credentials not found. Please log in again.", 401
+        
+        creds = Credentials(**creds_data)
+        service = build('sheets', 'v4', credentials=creds)
+
+        try:
+            response = service.spreadsheets().values().update(
+                spreadsheetId=sheet_id,
+                range=cell,
+                valueInputOption="RAW",
+                body={"values": [[text]]}
+            ).execute()
+        except Exception as e:
+            errors["api"] = f"Failed to write to sheet: {e}"
+            return render_template("sheets.html", errors=errors, values=request.form.copy())
+        
+        return render_template("sheets.html", redirect_url=link, back_url="/", errors={}, values={})
+    else:
+        return render_template("sheets.html", errors={}, values={})
+
+# Forms Automation Implementation
+@app.route("/forms", methods=["GET", "POST"])
+@login_required
+def forms():
+    if request.method == "POST":
+        errors = {}
+        link = request.form.get("link")
+
+        if not link:
+            errors["link"] = "Link is required."
+        else:
+            match = FORMS_URL_PATTERN.match(link)
+            if not match:
+                errors["link"] = "Invalid Google Forms link format."
+
+        if errors:
+            return render_template("forms.html", errors=errors, values=request.form.copy())
+        
+        form_id = match.group(1)
+        link = normalize_url(link, FORMS_URL_PATTERN)
+        creds_data = session.get('credentials')
+
+        if not creds_data:
+            return "Authentication credentials not found. Please log in again.", 401
+        
+        creds = Credentials(**creds_data)
+
+        try:
+            forms_service = build('forms', 'v1', credentials=creds)
+            response = forms_service.forms().responses().list(formId=form_id).execute()
+            responses = response.get("responses", [])
+        except Exception as e:
+            errors["api"] = f"Failed to fetch responses: {e}"
+            return render_template("forms.html", errors=errors, values=request.form.copy())
+
+        return render_template("forms.html", responses=responses, values=request.form.copy(), errors={}, form_url=link)
+
+
+    else:
+        return render_template("forms.html", errors={}, values={})
+
+# Search Automation Implementation
+@app.route("/search", methods=["GET", "POST"])
+@login_required
+def search():
+    if request.method == "POST":
+        pass
+    else:
+        return render_template("search.html", errors={}, values={})
+
+# News Automation Implementation
+@app.route("/news", methods=["GET", "POST"])
+@login_required
+def news():
+    if request.method == "POST":
+        pass
+    else:
+        return render_template("news.html", errors={}, values={})

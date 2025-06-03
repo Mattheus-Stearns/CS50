@@ -1,0 +1,54 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Google Forms
+{% endblock %}
+
+{% block main %}
+    <h2>Google Forms Automation</h2>
+    <p>First, it is necessary that you submit the url to the google form that you want to use this WebApp in, and it is necessary that you have read and write permissions
+         in that form. It should be in the form <u>https://docs.google.com/forms/d/<i>DOCUMENT_ID</i>/edit</u> . </p>
+
+    <form action="/forms" method="post">
+        <div class="mb-3">
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" name="link" placeholder="Google Form Link" type="text" value="{{ values.link or '' }}">
+        </div>
+        {% if errors.link %}
+            <div class="text-danger">{{ errors.link }}</div>
+        {% endif %}
+        <button class="btn btn-primary" type="submit">Grab Results</button>
+        {% if errors.api %}
+            <div class="text-danger">{{ errors.api }}</div>
+        {% endif %}
+    </form>
+
+    {% if form_url %}
+        <span id="form-link" data-url="{{ form_url }}"></span>
+    {% endif %}
+
+    {% if responses %}
+        <h2>Form Responses</h2>
+        {% for response in responses %}
+            <div>
+                <p><strong>Response ID:</strong> {{ response.responseId }}</p>
+                <ul>
+                    {% for key, value in response.answers.items() %}
+                        <li><strong>{{ key }}:</strong> {{ value.textAnswers.answers[0].value }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    window.onload = function () {
+        const formLinkEl = document.getElementById("form-link");
+        if (formLinkEl) {
+            const url = formLinkEl.dataset.url;
+            if (url) window.open(url, "_blank");
+        }
+    };
+</script>
+{% endblock %}
