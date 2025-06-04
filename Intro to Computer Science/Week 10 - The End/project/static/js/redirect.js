@@ -1,4 +1,4 @@
-console.log("Redirect script loaded.");
+// static/js/reditect.js
 window.onload = function () {
     const redirectTarget = document.querySelector("[data-redirect-url]");
     if (redirectTarget) {
