@@ -25,10 +25,28 @@ Google Docs:
 
 This is where I started making regex variables so that with form submission I would be able to convert the user submission of the google doc link to exactly how I wanted it to be. This also made it relatively easy, through a subtractive process, to get rid of the occurence of the user sumbitted link expressed in the regex variable and be left with the document's id, which is imperatoive to have so that google's docs api can work, and is harder to ask the user for outright, lest they misunderstand. 
 
-One thing that I had to find by trial and error is the different variable names that google uses on the developers' side to relate to what the user sees. I had to ensure that I was appending to google docs, and not just writing on a black copy every time, because if users' docs were wiped they would not be happy. 
+One thing that I had to find by trial and error is the different variable names that google uses on the developers' side to relate to what the user sees. I had to ensure that I was appending to google docs, and not just writing a blanck copy every time, because if users' docs were wiped they would not be happy. 
 
 Google Sheets:
 
+After doing google docs, google sheets was much easier. There was not anything expressely unique to the google sheets api, except that the service is on v4 and that you have to handle expressely the cell in which the inserting is taking place. Here I decided it was best to go for insertion, (thus wiping any data previously in that cell) because then that could handle inserting more data broadly in the sheets but also updating specific cells.
+
 Google Forms:
 
+Google forms was a bit complex in that google encourages people to be linking google sheets api and google forms together, and then mainly using google sheets to hamndle all of the responses, and I tried that out but it didn't feel authentic, nor was I actually even using google forms api. So then I decided that I would try and do one of the few things that google forms api does support: getting a json of all of the responses to a form, which the user gives the url of.
+
+This means that there was very little error handling to be done, because all I had to check was that the user responded and responded according to the regex that I made for google forms links. There was also very little that needed to be done to build the service, except I did have to make a concerted effort to sava a dict of all of the responses, and then passed that to my template, so that the jinjia could iterate over it and display everything in a table. 
+
 Google Search:
+
+Implimenting google search was really fun. I realized quickly that google did not have a google search api, but I remembered one of the classes where we implimented a more basic form of a google search by formatting a response in a string, following search?q=. I wanted to impliment the google search that I was familiar with in 2011, so I took a users input, and made sure that if there were spaces that they would be replaced with pluses (thats how google handles whitespace in its url) and then just redirected the user to the string that I had built. 
+
+I remembered that there was a "I'm feeling lucky" button in 2011, so I searched how to impliment that online, and it was relatively simple. Then I finally had the same search that I was looking at in 2011! How nolstalgic.
+
+Thanks:
+
+Taking CS50 has been a journey, and a journey that I would never regret taking. There were many nights that made me stay up way past midnight, pulling my hair out and accelerating my receding hairline (particularly when I was tasked with keeping the safety of fiftyville). While I have had a lot of passive programming experience in the past, seen by the fact that I always completed the hard problems, CS50 took my basic knowledge of lists and taught me about how they are handled at the lowest level, but also how they are handled at a much higher level, just as an example.
+
+For that reason I want to thank David Malan for being an awesome host to this journey, at the helm for a significant amount of time, and I also want to thank Finn Olsen, who tried to take CS50 after I did, and while he completed CS50P he didn't fare so well in CS50. Even though he couldn't do CS50, we still met up frequently and he would always listen to my compplaints about running into issues compiling on apple metal. 
+
+Finally, thanks to me, who had the courage to take CS50 in the last semester of my high school, and while most of my friends were split between drinking, studying, and sleeping, I was coding, studying, and sleeping. Oh right, drinking as well of course. <3 
